@@ -8,6 +8,10 @@ A small, tested Python library that puts deterministic controls around LLM featu
 
 ![Demo: budget stops a runaway loop, a denied tool, a human approval, a verified audit log](docs/demo.gif)
 
+![Architecture walkthrough: budgets, tool allow-lists, human approval, redacted hash-chained audit](docs/images/architecture-flow.gif)
+
+<sub>Static diagram: [docs/images/architecture.png](docs/images/architecture.png)</sub>
+
 ```mermaid
 flowchart LR
   APP[Your app / agent] --> GW{Gateway}
