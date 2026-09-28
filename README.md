@@ -6,6 +6,25 @@ A small, tested Python library that puts deterministic controls around LLM featu
 
 **The idea: the model can ask for anything, but deterministic code decides what actually happens.**
 
+![Demo: budget stops a runaway loop, a denied tool, a human approval, a verified audit log](docs/demo.gif)
+
+```mermaid
+flowchart LR
+  APP[Your app / agent] --> GW{Gateway}
+  GW -->|1. price + reserve budget| BUD[(Budget ledger)]
+  GW -->|2. call| LLM[Claude via Anthropic SDK]
+  LLM -->|usage| GW
+  GW -->|3. settle actual cost| BUD
+  GW -->|redacted entry| AUD[(Hash-chained audit log)]
+  GW -->|spans + cost metrics| OT[OpenTelemetry]
+  APP -->|tool call| POL{Allow-list}
+  POL -->|denied| AUD
+  POL -->|risky| Q[(Approval queue)]
+  Q -->|approved by a person| RUN[Execute tool]
+  POL -->|safe| RUN
+  RUN --> AUD
+```
+
 Every model call and every agent tool call goes through one `Gateway`:
 
 ```
