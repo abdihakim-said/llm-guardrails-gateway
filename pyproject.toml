@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "guardrails-gateway"
+version = "0.1.0"
+description = "Budgets, cost per call, redaction, tool allow-lists, human approval and a tamper-evident audit log for LLM apps"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Abdihakim Said" }]
+dependencies = []
+
+[project.optional-dependencies]
+anthropic = ["anthropic>=0.111"]
+otel = ["opentelemetry-api>=1.25"]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[project.scripts]
+guardrails = "guardrails_gateway.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
