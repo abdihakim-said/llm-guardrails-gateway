@@ -33,7 +33,7 @@ tool call:   allow-list for this agent → (park for human approval) → execute
 ```bash
 python -m venv .venv && . .venv/bin/activate
 pip install -e ".[dev,otel]"
-pytest -q                 # 20 tests, no network or API key needed
+pytest -q                 # 21 tests, no network or API key needed
 python examples/demo.py   # budgets, a denied tool, a human approval, audit verification
 ```
 

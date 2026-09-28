@@ -20,7 +20,7 @@ from .approvals import ApprovalQueue
 from .audit import AuditLog
 from .budget import BudgetLedger
 from .policy import Decision, ToolPolicy
-from .pricing import PriceTable
+from .pricing import PriceTable, UnknownModelError
 from .providers import Completion, Provider
 from .redact import redact
 
@@ -53,13 +53,18 @@ class Gateway:
                  system: str = "") -> Completion:
         self.prices.price(model)  # fail fast on an unpriced model
         est_in = self.provider.count_input_tokens(model, system, messages)
-        reservation = self.budgets.reserve(team, self.prices.max_cost(model, est_in, max_tokens))
+        reserved = self.prices.max_cost(model, est_in, max_tokens)
+        reservation = self.budgets.reserve(team, reserved)
         start = time.monotonic()
         try:
             with telemetry.model_call_span(self.provider.name, model, team) as span:
                 result = self.provider.complete(model, system, messages, max_tokens)
-                # Price by the model that served the call (a fallback may differ).
-                cost = self.prices.cost(result.model, result.usage)
+                # Price by the model that served the call (a fallback may differ). The call
+                # has already cost money, so an unpriced model is charged the reservation.
+                try:
+                    cost = self.prices.cost(result.model, result.usage)
+                except UnknownModelError:
+                    cost = reserved
                 telemetry.record_usage(span, self.provider.name, result.model, team,
                                        result.usage.input_tokens, result.usage.output_tokens,
                                        cost, time.monotonic() - start)

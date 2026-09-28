@@ -226,3 +226,11 @@ def test_cost_uses_the_model_that_served_the_call(tmp_path):
     g = Gateway(AnthropicProvider(client), budgets, AuditLog(tmp_path / "a.jsonl"))
     g.complete("t", "claude-opus-5", [{"role": "user", "content": "x"}], max_tokens=64)
     assert '"served_model": "claude-opus-4-8"' in (tmp_path / "a.jsonl").read_text()
+
+
+def test_unpriced_fallback_model_is_charged_the_reservation(tmp_path):
+    client, _ = _fake_client(model="some-unpriced-fallback")
+    budgets = BudgetLedger(limits={"t": Decimal("1")})
+    g = Gateway(AnthropicProvider(client), budgets, AuditLog(tmp_path / "a.jsonl"))
+    g.complete("t", "claude-opus-5", [{"role": "user", "content": "x"}], max_tokens=64)
+    assert budgets.spent("t") > 0
